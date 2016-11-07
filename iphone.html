@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iphone_lock</title>
+    <style type="text/css">
+        #iphone{
+            z-index: 101;
+            position: relative;
+            width: 426px;
+            height: 640px;
+            background: url("1.jpg");
+            margin: 0 auto;
+            margin-top: 40px;
+        }
+        #lock_way{
+             position: absolute;
+             bottom: 32px;
+             left: 34px;
+             height: 62px;
+             width: 358px;
+        }
+        #lock{
+            position: absolute;
+            width: 93px;
+            height: 62px;
+            cursor: pointer;
+            background: url("lock.jpg");
+        }
+    </style>
+    <script type="text/javascript">
+        window.onload = function () {
+            var iPhone = document.getElementById("iphone");
+            var oLock = document.getElementById("lock_way");
+            var oBtn = oLock.getElementsByTagName("a")[0];
+            var disX = 0;
+            var maxL = oLock.clientWidth - oBtn.offsetWidth;
+            var oBg = document.createElement("img");
+            oBg.src = "2.jpg";
+            oBtn.onmousedown = function (e)
+            {
+                var e = e || window.event;
+                disX = e.clientX - this.offsetLeft;
+                document.onmousemove = function (e)
+                {
+                    var e = e || window.event;
+                    var l = e.clientX - disX;
+                    l < 0 && (l = 0);
+                    l > maxL && (l = maxL);
+                    oBtn.style.left = l + "px";
+                    oBtn.offsetLeft == maxL && (iPhone.style.background = "url("+ oBg.src +")", oLock.style.display = "none");
+                };
+                document.onmouseup = function ()
+                {
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                    //如果滑动距离超过一半，则直接move到底
+                    oBtn.offsetLeft > maxL / 2 ?
+                        startMove(maxL, function ()
+                        {
+                            iPhone.style.background = "url("+ oBg.src +")";
+                            oLock.style.display = "none"
+                        }) :
+                        //如果没到一半，则回到原点
+                        startMove(0)
+                };
+            };
+            //为解锁滑块设定定时器，实现平滑滑动
+            function startMove (iTarget, cb)
+            {
+                clearInterval(oBtn.timer);
+                oBtn.timer = setInterval(function ()
+                {
+                    doMove(iTarget, cb)
+                }, 30)
+            }
+            //滑动缓冲函数
+            function doMove (iTarget, cb)
+            {
+                var iSpeed = (iTarget - oBtn.offsetLeft) / 5;
+                //避免出现小数而跳动，向上向下取整
+                iSpeed = iSpeed > 0 ? Math.ceil(iSpeed) : Math.floor(iSpeed);
+                //如果到达目的地则清空定时器，否则继续滑动
+                iTarget == oBtn.offsetLeft ? (clearInterval(oBtn.timer),  cb && cb()) : oBtn.style.left = iSpeed + oBtn.offsetLeft + "px"
+            }
+        };
+    </script>
+</head>
+<body>
+<div id="iphone">
+        <div id="lock_way">
+            <a id="lock"></a>
+        </div>
+    </div>
+</body>
+</html>
